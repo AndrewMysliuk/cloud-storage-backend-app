@@ -133,3 +133,4 @@ dist
 static
 files
 --watch
+.DS_Store

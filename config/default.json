@@ -1,0 +1,5 @@
+{
+  "server_port": 3001,
+  "db_url": "mongodb+srv://root:1234QWER@cloud.wberqev.mongodb.net/?retryWrites=true&w=majority",
+  "secret_key": "my-jwt-secret-key"
+}

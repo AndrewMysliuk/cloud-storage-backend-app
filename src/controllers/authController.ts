@@ -8,7 +8,17 @@ import User, { IUser, UserResponse } from "../models/User"
 class AuthController {
   async registration(req: DataRequest, res: Response) {
     try {
-      const { email, password }: { email: string; password: string } = req.body
+      const {
+        email,
+        password,
+        first_name,
+        last_name,
+      }: {
+        email: string
+        password: string
+        first_name: string
+        last_name: string
+      } = req.body
       const member = await User.findOne({ email })
 
       if (member)
@@ -17,7 +27,12 @@ class AuthController {
           .json({ message: `User with email ${email} has already exist ` })
 
       const hashPassword = await authService.hashPassword(password)
-      const user = new User({ email, password: hashPassword })
+      const user = new User({
+        email,
+        password: hashPassword,
+        first_name,
+        last_name,
+      })
       await user.save()
       await fileService.createDir(req, new File({ user: user.id, name: "" }))
 
@@ -52,6 +67,8 @@ class AuthController {
         user: {
           id: user._id.toString(),
           email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
           drive_space: user.drive_space,
           used_space: user.used_space,
           avatar: user?.avatar,
@@ -73,6 +90,8 @@ class AuthController {
       return res.json({
         id: user._id.toString(),
         email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
         drive_space: user.drive_space,
         used_space: user.used_space,
         avatar: user?.avatar,

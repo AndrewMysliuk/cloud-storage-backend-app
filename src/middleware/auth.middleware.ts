@@ -1,9 +1,9 @@
 import { Response, NextFunction } from "express"
-import { DataRequest } from "../models/Requests"
+import { IDataRequest } from "../models/IRequests"
 import authService from "../services/authService"
 
 export default function auth(
-  req: DataRequest,
+  req: IDataRequest,
   res: Response,
   next: NextFunction
 ) {

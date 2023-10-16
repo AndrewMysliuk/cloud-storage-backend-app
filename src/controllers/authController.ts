@@ -1,12 +1,10 @@
 import { Response } from "express"
-import fileService from "../services/fileService"
 import authService from "../services/authService"
-import { DataRequest, UserJwtPayload } from "../models/Requests"
-import File from "../models/File"
-import User, { IUser, UserResponse } from "../models/User"
+import { IDataRequest, IUserJwtPayload } from "../models/IRequests"
+import User, { IUser, IUserResponse } from "../models/IUser"
 
 class AuthController {
-  async registration(req: DataRequest, res: Response) {
+  async registration(req: IDataRequest, res: Response) {
     try {
       const {
         email,
@@ -21,10 +19,7 @@ class AuthController {
       } = req.body
       const member = await User.findOne({ email })
 
-      if (member)
-        return res
-          .status(500)
-          .json({ message: `User with email ${email} has already exist ` })
+      if (member) return res.status(500).json({ message: `User with email: ${email} has already exist` })
 
       const hashPassword = await authService.hashPassword(password)
       const user = new User({
@@ -34,7 +29,6 @@ class AuthController {
         last_name,
       })
       await user.save()
-      await fileService.createDir(req, new File({ user: user.id, name: "" }))
 
       return res.json({ message: "User has been created" })
     } catch (e) {
@@ -43,7 +37,7 @@ class AuthController {
     }
   }
 
-  async login(req: DataRequest, res: Response) {
+  async login(req: IDataRequest, res: Response) {
     try {
       const { email, password }: { email: string; password: string } = req.body
       const user = await User.findOne({ email })
@@ -51,29 +45,16 @@ class AuthController {
         return res.status(500).json({ message: "User not found" })
       }
 
-      const isPasswordValid = authService.comparePasswords(
-        password,
-        user.password
-      )
+      const isPasswordValid = authService.comparePasswords(password, user.password)
 
       if (!isPasswordValid) {
-        return res.status(500).json({ message: "Something went wrong: /login" })
+        return res.status(500).json({ message: "Wrong email or password" })
       }
 
       const token = authService.createToken(user._id.toString())
 
       return res.json({
         token,
-        user: {
-          id: user._id.toString(),
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          drive_space: user.drive_space,
-          used_space: user.used_space,
-          avatar: user?.avatar,
-          files: user?.files || [],
-        } as UserResponse,
       })
     } catch (e) {
       console.log(e)
@@ -81,22 +62,26 @@ class AuthController {
     }
   }
 
-  async getMe(req: DataRequest, res: Response) {
+  async getMe(req: IDataRequest, res: Response) {
     try {
       const user = (await User.findOne({
-        _id: (req.user as UserJwtPayload).id,
+        _id: (req.user as IUserJwtPayload).id,
       })) as IUser
 
       return res.json({
-        id: user._id.toString(),
+        id: user._id,
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
-        drive_space: user.drive_space,
-        used_space: user.used_space,
-        avatar: user?.avatar,
-        files: user?.files || [],
-      } as UserResponse)
+        avatar: user.avatar,
+        icon_color: user.icon_color,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        status: user.status,
+        storage_used: user.storage_used,
+        storage_limit: user.storage_limit,
+        files: user?.files ?? [],
+      } as IUserResponse)
     } catch (e) {
       console.log(e)
       return res.status(500).json({ message: "Internal Server Error" })

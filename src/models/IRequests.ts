@@ -1,12 +1,12 @@
 import { Request } from "express"
 import { JwtPayload } from "jsonwebtoken"
 
-export interface UserJwtPayload extends JwtPayload {
+export interface IUserJwtPayload extends JwtPayload {
   id?: string
 }
 
-export interface DataRequest extends Request {
-  user?: string | UserJwtPayload
+export interface IDataRequest extends Request {
+  user?: string | IUserJwtPayload
   file_path?: string
   static_path?: string
 }

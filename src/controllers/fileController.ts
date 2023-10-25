@@ -44,9 +44,9 @@ class FileController {
   async fetchFiles(req: IDataRequest, res: Response) {
     try {
       const files = await File.find({
-        user: (req.user as IUserJwtPayload).id,
-        parent: req.query.parent,
-      }).sort({ date: 1 })
+        owner: (req.user as IUserJwtPayload).id,
+        parent: req.query.parent === "null" ? null : req.query.parent,
+      })
 
       return res.json(files)
     } catch (e) {
@@ -59,7 +59,7 @@ class FileController {
       const file = req.files?.file as fileUpload.UploadedFile
 
       const parent = await File.findOne({
-        user: (req.user as IUserJwtPayload).id,
+        owner: (req.user as IUserJwtPayload).id,
         _id: req.body.parent,
       })
       const user = await User.findOne({
@@ -121,7 +121,7 @@ class FileController {
     try {
       const file = (await File.findOne({
         _id: req.query.id,
-        user: (req.user as IUserJwtPayload).id,
+        owner: (req.user as IUserJwtPayload).id,
       })) as IFile
       const path = fileService.getPath(req, file)
 
@@ -139,7 +139,7 @@ class FileController {
     try {
       const file = await File.findOne({
         _id: req.query.id,
-        user: (req.user as IUserJwtPayload).id,
+        owner: (req.user as IUserJwtPayload).id,
       })
 
       if (!file) {
@@ -149,7 +149,7 @@ class FileController {
       fileService.deleteFile(req, file)
       await file.deleteOne({
         _id: req.query.id,
-        user: (req.user as IUserJwtPayload).id,
+        owner: (req.user as IUserJwtPayload).id,
       })
 
       return res.json({ message: "file has been deleted" })
@@ -162,7 +162,7 @@ class FileController {
     try {
       const searchName = req.query.search_name as string
 
-      let files = await File.find({ user: (req.user as IUserJwtPayload).id })
+      let files = await File.find({ owner: (req.user as IUserJwtPayload).id })
       files = files.filter((file: IFile) => file.name.toLowerCase().includes(searchName.toLowerCase()))
 
       return res.json(files)

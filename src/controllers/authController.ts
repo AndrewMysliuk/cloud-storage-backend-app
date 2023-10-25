@@ -1,7 +1,9 @@
 import { Response } from "express"
 import authService from "../services/authService"
+import fileService from "../services/fileService"
 import { IDataRequest, IUserJwtPayload } from "../models/IRequests"
 import User, { IUser, IUserResponse } from "../models/IUser"
+import File, { IFile, FileTypeEnum, FileStatusEnum } from "../models/IFile"
 
 class AuthController {
   async registration(req: IDataRequest, res: Response) {
@@ -29,6 +31,14 @@ class AuthController {
         last_name,
       })
       await user.save()
+      await fileService.createDir(
+        req,
+        new File<IFile>({
+          owner: user.id,
+          name: "",
+          type: FileTypeEnum.DIRECTORY,
+        } as IFile),
+      )
 
       return res.json({ message: "User has been created" })
     } catch (e) {

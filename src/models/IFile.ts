@@ -20,8 +20,8 @@ export interface IFileResponse {
   extension?: string
   type: FileTypeEnum
   size?: number
-  created_at: timestamp
-  updated_at: timestamp
+  created_at?: timestamp
+  updated_at?: timestamp
   path: string
   owner: uuid
   access?: uuid[]
@@ -36,12 +36,12 @@ export interface IFile extends Document {
   extension?: string
   type: FileTypeEnum
   size?: number
-  created_at: timestamp
-  updated_at: timestamp
+  created_at?: timestamp
+  updated_at?: timestamp
   path: string
   owner: uuid
   access?: uuid[]
-  status: FileStatusEnum
+  status?: FileStatusEnum
   parent?: uuid
   child?: uuid[]
 }

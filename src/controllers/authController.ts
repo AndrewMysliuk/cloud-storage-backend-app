@@ -84,7 +84,6 @@ class AuthController {
         first_name: user.first_name,
         last_name: user.last_name,
         avatar: user.avatar,
-        icon_color: user.icon_color,
         created_at: user.created_at,
         updated_at: user.updated_at,
         status: user.status,

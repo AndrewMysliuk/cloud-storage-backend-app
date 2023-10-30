@@ -2,17 +2,8 @@ import { Schema, model } from "mongoose"
 import { v4 as uuidv4 } from "uuid"
 import { uuid, timestamp } from "./ICommon"
 
-export enum UserIconColorEnum {
-  GREEN = "green",
-  RED = "red",
-  PURPLE = "purple",
-  ORANGE = "orange",
-}
-
 export enum UserStatusEnum {
   ACTIVE = "active",
-  PENDING = "pending",
-  DELETED = "deleted",
   PAUSED = "paused",
 }
 
@@ -22,7 +13,6 @@ export interface IUserResponse {
   first_name: string
   last_name: string
   avatar: string | null
-  icon_color: UserIconColorEnum
   created_at: timestamp
   updated_at: timestamp
   status: UserStatusEnum
@@ -38,7 +28,6 @@ export interface IUser extends Document {
   first_name: string
   last_name: string
   avatar: string | null
-  icon_color: UserIconColorEnum
   created_at: timestamp
   updated_at: timestamp
   status: UserStatusEnum
@@ -57,7 +46,6 @@ const User = new Schema<IUser>({
   storage_used: { type: Number, default: 0 },
   avatar: { type: String, default: null },
   files: { type: Array<Schema.Types.String>, ref: "File" },
-  icon_color: { type: String, enum: Object.values(UserIconColorEnum), default: UserIconColorEnum.PURPLE },
   created_at: { type: String, default: new Date().toISOString() },
   updated_at: { type: String, default: new Date().toISOString() },
   status: { type: String, enum: Object.values(UserStatusEnum), default: UserStatusEnum.ACTIVE },

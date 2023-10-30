@@ -102,7 +102,7 @@ class FileController {
         path: filePath,
         parent: parent ? parent._id : null,
         owner: user?._id,
-        status: FileStatusEnum.CREATED,
+        status: FileStatusEnum.UPLOADED,
         created_at: new Date().toISOString() as unknown as timestamp,
         updated_at: new Date().toISOString() as unknown as timestamp,
       } as IFile)

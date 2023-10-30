@@ -3,10 +3,8 @@ import { v4 as uuidv4 } from "uuid"
 import { uuid, timestamp } from "./ICommon"
 
 export enum FileStatusEnum {
-  PENDING = "pending",
   UPLOADED = "uploaded",
   CREATED = "created",
-  DELETED = "deleted",
 }
 
 export enum FileTypeEnum {
@@ -24,7 +22,6 @@ export interface IFileResponse {
   updated_at?: timestamp
   path: string
   owner: uuid
-  access?: uuid[]
   status: FileStatusEnum
   parent?: uuid
   child?: uuid[]
@@ -40,7 +37,6 @@ export interface IFile extends Document {
   updated_at?: timestamp
   path: string
   owner: uuid
-  access?: uuid[]
   status?: FileStatusEnum
   parent?: uuid
   child?: uuid[]
@@ -56,7 +52,6 @@ const File = new Schema<IFile>({
   updated_at: { type: String, default: new Date().toISOString() },
   path: { type: String, default: "" },
   owner: { type: String, ref: "User" },
-  access: { type: Array<Schema.Types.String>, ref: "User" },
   status: { type: String, enum: Object.values(FileStatusEnum), default: FileStatusEnum.CREATED },
   parent: { type: String, ref: "File" },
   child: { type: Array<Schema.Types.String>, ref: "File" },

@@ -46,7 +46,7 @@ class FileController {
       const files = await File.find({
         owner: (req.user as IUserJwtPayload).id,
         parent: req.query.parent === "null" ? null : req.query.parent,
-      })
+      }).sort({ date: 1 })
 
       return res.json(files)
     } catch (e) {
@@ -109,6 +109,12 @@ class FileController {
 
       await dbFile.save()
       await user.save()
+
+      if (parent) {
+        parent.child = [...(parent?.child ?? []), dbFile._id]
+      }
+
+      await parent?.save()
 
       return res.json(dbFile)
     } catch (e) {

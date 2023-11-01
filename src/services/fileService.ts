@@ -23,7 +23,7 @@ class FileService {
   deleteFile(req: IDataRequest, file: IFile) {
     const path = this.getPath(req, file)
     if (file.type === FileTypeEnum.DIRECTORY) {
-      fs.rmdirSync(path)
+      fs.rmdirSync(path, { recursive: true })
     } else {
       fs.unlinkSync(path)
     }

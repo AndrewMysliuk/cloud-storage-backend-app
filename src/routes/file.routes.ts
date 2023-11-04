@@ -6,6 +6,7 @@ const router = Router()
 
 router.post("/create-directory", authMiddleware, fileController.createDir)
 router.post("/upload", authMiddleware, fileController.uploadFile)
+router.post("/rename", authMiddleware, fileController.renameFile)
 router.get("/get-files", authMiddleware, fileController.fetchFiles)
 router.get("/download", authMiddleware, fileController.downloadFile)
 router.get("/search", authMiddleware, fileController.searchFile)

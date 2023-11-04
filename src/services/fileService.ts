@@ -1,6 +1,7 @@
 import fs from "fs"
-import { IFile, FileTypeEnum } from "../models/IFile"
+import File, { IFile, FileTypeEnum } from "../models/IFile"
 import { IDataRequest } from "../models/IRequests"
+import { uuid } from "../models/ICommon"
 
 class FileService {
   createDir(req: IDataRequest, file: IFile) {
@@ -31,6 +32,20 @@ class FileService {
 
   getPath(req: IDataRequest, file: IFile) {
     return `${req.file_path}/${file.owner}/${file.path}`
+  }
+
+  async updateChildPaths(oldPath: string, newPath: string, ownerId: uuid) {
+    const children = await File.find({ path: new RegExp(`^${oldPath}`), owner: ownerId })
+
+    for (const child of children) {
+      const childNewPath = child.path.replace(oldPath, newPath)
+      child.path = childNewPath
+      await child.save()
+
+      if (child.child && child.child.length) {
+        await this.updateChildPaths(child.path, childNewPath, ownerId)
+      }
+    }
   }
 }
 

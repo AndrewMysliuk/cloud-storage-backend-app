@@ -164,6 +164,40 @@ class FileController {
     }
   }
 
+  async renameFile(req: IDataRequest, res: Response) {
+    try {
+      const { id, name }: { id: uuid; name: string } = req.body
+
+      const file = await File.findOne({
+        _id: id,
+        owner: (req.user as IUserJwtPayload).id,
+      })
+
+      if (!file) {
+        return res.status(500).json({ message: "file not found" })
+      }
+
+      const oldPath = file.path
+      const newPath = oldPath.replace(/[^/]*$/, name)
+
+      let newFullPath = `${req.file_path}/${file.owner}/${newPath}`
+
+      if (file.type === FileTypeEnum.FILE) newFullPath = `${newFullPath}.${file.extension}`
+
+      fs.renameSync(`${req.file_path}/${file.owner}/${oldPath}`, newFullPath)
+
+      file.path = `${newPath}.${file.extension}`
+      file.name = `${name}.${file.extension}`
+      await file?.save()
+
+      await fileService.updateChildPaths(oldPath, newPath, file.owner)
+
+      return res.json(file)
+    } catch (e) {
+      return res.status(500).json(e)
+    }
+  }
+
   async searchFile(req: IDataRequest, res: Response) {
     try {
       const searchName = req.query.search_name as string

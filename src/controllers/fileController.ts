@@ -143,21 +143,9 @@ class FileController {
 
   async deleteFile(req: IDataRequest, res: Response) {
     try {
-      const file = await File.findOne({
-        _id: req.query.id,
-        owner: (req.user as IUserJwtPayload).id,
-      })
+      const fileId = req.query.id as uuid
 
-      if (!file) {
-        return res.status(500).json({ message: "file not found" })
-      }
-
-      fileService.deleteFile(req, file)
-      await file.deleteOne({
-        _id: req.query.id,
-        owner: (req.user as IUserJwtPayload).id,
-      })
-
+      await fileService.deleteFilesAndFolder(req, fileId)
       return res.json({ message: "file has been deleted" })
     } catch (e) {
       return res.status(500).json(e)

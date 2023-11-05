@@ -1,6 +1,6 @@
 import fs from "fs"
 import File, { IFile, FileTypeEnum } from "../models/IFile"
-import { IDataRequest } from "../models/IRequests"
+import { IDataRequest, IUserJwtPayload } from "../models/IRequests"
 import { uuid } from "../models/ICommon"
 
 class FileService {
@@ -24,7 +24,7 @@ class FileService {
   deleteFile(req: IDataRequest, file: IFile) {
     const path = this.getPath(req, file)
     if (file.type === FileTypeEnum.DIRECTORY) {
-      fs.rmdirSync(path, { recursive: true })
+      fs.rmSync(path, { recursive: true })
     } else {
       fs.unlinkSync(path)
     }
@@ -46,6 +46,26 @@ class FileService {
         await this.updateChildPaths(child.path, childNewPath, ownerId)
       }
     }
+  }
+
+  async deleteFilesAndFolder(req: IDataRequest, folderId: uuid) {
+    const folder = await File.findOne({ _id: folderId, owner: (req.user as IUserJwtPayload).id })
+
+    if (!folder) {
+      throw new Error("folder not found")
+    }
+
+    if (folder.type === FileTypeEnum.DIRECTORY) {
+      const childFiles = await File.find({ parent: folder._id, owner: (req.user as IUserJwtPayload).id })
+
+      for (const child of childFiles) {
+        await this.deleteFilesAndFolder(req, child._id)
+      }
+    }
+
+    this.deleteFile(req, folder)
+
+    await File.deleteOne({ _id: folder._id, owner: (req.user as IUserJwtPayload).id })
   }
 }
 

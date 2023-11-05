@@ -12,7 +12,12 @@ import { Server } from "http"
 const app = express()
 const PORT = process.env.PORT || config.get("server_port")
 
-app.use(fileUpload({}))
+app.use(
+  fileUpload({
+    defCharset: "utf8",
+    defParamCharset: "utf8",
+  }),
+)
 app.use(corsMiddleware)
 app.use(filePath(path.resolve(__dirname, "files").toString()))
 app.use(staticPath(path.resolve(__dirname, "static").toString()))

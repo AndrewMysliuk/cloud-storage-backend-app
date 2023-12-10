@@ -20,6 +20,7 @@ class FileController {
         status: FileStatusEnum.CREATED,
         created_at: new Date().toISOString() as unknown as timestamp,
         updated_at: new Date().toISOString() as unknown as timestamp,
+        starred: false,
       } as IFile)
 
       const parentFile = await File.findOne({ _id: parent })
@@ -105,6 +106,7 @@ class FileController {
         status: FileStatusEnum.UPLOADED,
         created_at: new Date().toISOString() as unknown as timestamp,
         updated_at: new Date().toISOString() as unknown as timestamp,
+        starred: false,
       } as IFile)
 
       await dbFile.save()

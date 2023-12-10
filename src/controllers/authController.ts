@@ -37,6 +37,7 @@ class AuthController {
           owner: user.id,
           name: "",
           type: FileTypeEnum.DIRECTORY,
+          starred: false,
         } as IFile),
       )
 

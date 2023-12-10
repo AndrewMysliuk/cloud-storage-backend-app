@@ -25,6 +25,7 @@ export interface IFileResponse {
   status: FileStatusEnum
   parent?: uuid
   child?: uuid[]
+  starred: boolean
 }
 
 export interface IFile extends Document {
@@ -40,6 +41,7 @@ export interface IFile extends Document {
   status?: FileStatusEnum
   parent?: uuid
   child?: uuid[]
+  starred: boolean
 }
 
 const File = new Schema<IFile>({
@@ -55,6 +57,7 @@ const File = new Schema<IFile>({
   status: { type: String, enum: Object.values(FileStatusEnum), default: FileStatusEnum.CREATED },
   parent: { type: String, ref: "File" },
   child: { type: Array<Schema.Types.String>, ref: "File" },
+  starred: { type: Boolean, default: false },
 })
 
 export default model<IFile>("File", File)

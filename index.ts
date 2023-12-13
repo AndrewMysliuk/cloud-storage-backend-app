@@ -3,7 +3,10 @@ import mongoose from "mongoose"
 import config from "config"
 import path from "path"
 import fileUpload from "express-fileupload"
-import corsMiddleware from "./src/middleware/cors.middleware"
+import cors from "cors"
+import "./src/plugins/supertokens"
+import SuperTokens from "supertokens-node"
+import { errorHandler, middleware as supertokensMiddleware } from "supertokens-node/framework/express"
 import { filePath, staticPath } from "./src/middleware/filepath.middleware"
 import authRouter from "./src/routes/auth.routes"
 import fileRouter from "./src/routes/file.routes"
@@ -13,18 +16,27 @@ const app = express()
 const PORT = process.env.PORT || config.get("server_port")
 
 app.use(
+  cors({
+    origin: "http://localhost:3000",
+    allowedHeaders: ["content-type", ...SuperTokens.getAllCORSHeaders()],
+    methods: ["GET", "PUT", "POST", "DELETE"],
+    credentials: true,
+  }),
+)
+app.use(
   fileUpload({
     defCharset: "utf8",
     defParamCharset: "utf8",
   }),
 )
-app.use(corsMiddleware)
 app.use(filePath(path.resolve(__dirname, "files").toString()))
 app.use(staticPath(path.resolve(__dirname, "static").toString()))
 app.use(express.json())
 app.use(express.static("static"))
+app.use(supertokensMiddleware())
 app.use("/api/auth/", authRouter)
 app.use("/api/storage/", fileRouter)
+app.use(errorHandler())
 
 const handleShutdown = (server: Server) => {
   server.close(() => {

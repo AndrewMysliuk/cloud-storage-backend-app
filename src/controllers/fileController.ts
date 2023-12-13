@@ -3,7 +3,7 @@ import fs from "fs"
 import User from "../models/IUser"
 import File, { IFile, FileTypeEnum, FileStatusEnum } from "../models/IFile"
 import { Response } from "express"
-import { IDataRequest, IUserJwtPayload } from "../models/IRequests"
+import { IDataRequest } from "../models/IRequests"
 import fileUpload from "express-fileupload"
 import { timestamp, uuid } from "../models/ICommon"
 
@@ -15,7 +15,7 @@ class FileController {
         type: FileTypeEnum.DIRECTORY,
         name,
         parent,
-        owner: (req.user as IUserJwtPayload).id as uuid,
+        owner: req?.user_id,
         path: "",
         status: FileStatusEnum.CREATED,
         created_at: new Date().toISOString() as unknown as timestamp,
@@ -45,7 +45,7 @@ class FileController {
   async fetchFiles(req: IDataRequest, res: Response) {
     try {
       const files = await File.find({
-        owner: (req.user as IUserJwtPayload).id,
+        owner: req?.user_id,
         parent: req.query.parent === "null" ? null : req.query.parent,
       }).sort({ date: 1 })
 
@@ -60,11 +60,11 @@ class FileController {
       const file = req.files?.file as fileUpload.UploadedFile
 
       const parent = await File.findOne({
-        owner: (req.user as IUserJwtPayload).id,
+        owner: req?.user_id,
         _id: req.body.parent,
       })
       const user = await User.findOne({
-        _id: (req.user as IUserJwtPayload).id,
+        _id: req?.user_id,
       })
 
       if (!user) {
@@ -129,7 +129,7 @@ class FileController {
     try {
       const file = (await File.findOne({
         _id: req.query.id,
-        owner: (req.user as IUserJwtPayload).id,
+        owner: req?.user_id,
       })) as IFile
       const path = fileService.getPath(req, file)
 
@@ -160,7 +160,7 @@ class FileController {
 
       const file = await File.findOne({
         _id: id,
-        owner: (req.user as IUserJwtPayload).id,
+        owner: req?.user_id,
       })
 
       if (!file) {
@@ -192,7 +192,7 @@ class FileController {
     try {
       const searchName = req.query.search_name as string
 
-      let files = await File.find({ owner: (req.user as IUserJwtPayload).id })
+      let files = await File.find({ owner: req?.user_id })
       files = files.filter((file: IFile) => file.name.toLowerCase().includes(searchName.toLowerCase()))
 
       return res.json(files)

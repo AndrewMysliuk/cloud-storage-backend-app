@@ -1,26 +1,23 @@
 import { Response, NextFunction } from "express"
 import { IDataRequest } from "../models/IRequests"
-import authService from "../services/authService"
+import Session from "supertokens-node/recipe/session"
 
-export default function auth(
-  req: IDataRequest,
-  res: Response,
-  next: NextFunction
-) {
+export default async function checkAuthentication(req: IDataRequest, res: Response, next: NextFunction) {
   if (req.method === "OPTIONS") {
     return next()
   }
 
   try {
-    const token = req.headers.authorization?.split(" ")[1]
-    if (!token) {
-      return res.status(401).json({ message: "auth error" })
+    const session = await Session.getSession(req, res)
+
+    if (!session || !session.getUserId() || !session.getAccessTokenPayload()?.user_id) {
+      return res.status(401).json({ message: "User not authenticated" })
     }
-    const decode = authService.verifyToken(token)
-    req.user = decode
+
+    req.user_id = session.getAccessTokenPayload().user_id
 
     next()
-  } catch (e) {
-    return res.status(401).json({ message: "auth error" })
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" })
   }
 }

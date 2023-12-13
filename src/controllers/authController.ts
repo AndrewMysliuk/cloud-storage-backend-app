@@ -1,9 +1,10 @@
 import { Response } from "express"
-import authService from "../services/authService"
 import fileService from "../services/fileService"
-import { IDataRequest, IUserJwtPayload } from "../models/IRequests"
+import { IDataRequest } from "../models/IRequests"
 import User, { IUser, IUserResponse } from "../models/IUser"
-import File, { IFile, FileTypeEnum, FileStatusEnum } from "../models/IFile"
+import File, { IFile, FileTypeEnum } from "../models/IFile"
+import EmailPassword from "supertokens-node/recipe/emailpassword"
+import { createNewSession } from "supertokens-node/recipe/session"
 
 class AuthController {
   async registration(req: IDataRequest, res: Response) {
@@ -14,27 +15,30 @@ class AuthController {
         first_name,
         last_name,
       }: {
+        tenantId: string
         email: string
         password: string
         first_name: string
         last_name: string
       } = req.body
-      const member = await User.findOne({ email })
 
-      if (member) return res.status(500).json({ message: `User with email: ${email} has already exist` })
+      const result = await EmailPassword.signUp("", email, password)
 
-      const hashPassword = await authService.hashPassword(password)
-      const user = new User({
+      if (result.status === "EMAIL_ALREADY_EXISTS_ERROR") {
+        return res.status(409).json({ message: `User with email: ${email} already exists` })
+      }
+
+      const newUser = new User({
         email,
-        password: hashPassword,
         first_name,
         last_name,
       })
-      await user.save()
+
+      await newUser.save()
       await fileService.createDir(
         req,
         new File<IFile>({
-          owner: user.id,
+          owner: newUser.id,
           name: "",
           type: FileTypeEnum.DIRECTORY,
           starred: false,
@@ -51,22 +55,21 @@ class AuthController {
   async login(req: IDataRequest, res: Response) {
     try {
       const { email, password }: { email: string; password: string } = req.body
+
+      const signInResult = await EmailPassword.signIn("", email, password)
+
+      if (signInResult.status === "WRONG_CREDENTIALS_ERROR") {
+        return res.status(401).json({ message: "Wrong email or password" })
+      }
+
       const user = await User.findOne({ email })
       if (!user) {
         return res.status(500).json({ message: "User not found" })
       }
 
-      const isPasswordValid = authService.comparePasswords(password, user.password)
+      const session = await createNewSession(req, res, "", signInResult.recipeUserId, { user_id: user._id.toString() })
 
-      if (!isPasswordValid) {
-        return res.status(500).json({ message: "Wrong email or password" })
-      }
-
-      const token = authService.createToken(user._id.toString())
-
-      return res.json({
-        token,
-      })
+      return res.json({ message: "Logged in successfully", sessionHandle: session.getHandle() })
     } catch (e) {
       console.log(e)
       return res.status(500).json({ message: "Internal Server Error" })
@@ -76,7 +79,7 @@ class AuthController {
   async getMe(req: IDataRequest, res: Response) {
     try {
       const user = (await User.findOne({
-        _id: (req.user as IUserJwtPayload).id,
+        _id: req?.user_id,
       })) as IUser
 
       return res.json({

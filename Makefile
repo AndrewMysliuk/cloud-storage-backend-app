@@ -1,5 +1,3 @@
-IMAGE_NAME ?= node-backend
-
 install:
 	yarn install
 
@@ -9,13 +7,13 @@ run:
 build:
 	yarn build && yarn start
 
-docker-build:
-	docker build . -t ${IMAGE_NAME}
+docker-compose-stop:
+	docker-compose down
 
-docker-run:
-	docker run -p 3001:3001 -d ${IMAGE_NAME}
+docker-compose-start:
+	docker-compose up -d --build
 
-.PHONY: install run build docker-build docker-run
+docker-compose-restart:
+	stop start
 
-# docker run -p 3567:3567 -e API_KEYS="test-api-key-for-my-cloud-storage" -d registry.supertokens.io/supertokens/supertokens-postgresql:7.0
-# http://localhost:3001/api/dashboard/
+.PHONY: install run build docker-compose-stop docker-compose-start docker-compose-restart

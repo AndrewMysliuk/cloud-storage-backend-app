@@ -6,7 +6,7 @@ import Dashboard from "supertokens-node/recipe/dashboard"
 supertokens.init({
   framework: "express",
   supertokens: {
-    connectionURI: "http://localhost:3567",
+    connectionURI: "http://supertokens:3567",
     apiKey: "test-api-key-for-my-cloud-storage",
   },
   appInfo: {

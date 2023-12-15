@@ -11,7 +11,7 @@
     "create_static": "mkdir -p dist/static"
   },
   "dependencies": {
-    "@types/express-fileupload": "^1.4.3",
+    "axios": "^1.6.2",
     "concurrently": "^7.6.0",
     "config": "^3.3.9",
     "cors": "^2.8.5",
@@ -28,11 +28,11 @@
     "@types/config": "^3.3.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.17",
+    "@types/express-fileupload": "^1.4.3",
     "@types/express-ws": "^3.0.1",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^18.14.0",
     "@types/uuid": "^9.0.1",
-    "@types/ws": "^8.5.4",
     "nodemon": "^2.0.20",
     "typescript": "^4.9.5"
   }

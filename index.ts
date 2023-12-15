@@ -10,6 +10,7 @@ import { errorHandler, middleware as supertokensMiddleware } from "supertokens-n
 import { filePath, staticPath } from "./src/middleware/filepath.middleware"
 import authRouter from "./src/routes/auth.routes"
 import fileRouter from "./src/routes/file.routes"
+import centrifugeRouter from "./src/routes/centrifuge.routes"
 import { Server } from "http"
 
 const app = express()
@@ -36,6 +37,7 @@ app.use(express.static("static"))
 app.use(supertokensMiddleware())
 app.use("/api/auth/", authRouter)
 app.use("/api/storage/", fileRouter)
+app.use("/ws/", centrifugeRouter)
 app.use(errorHandler())
 
 const handleShutdown = (server: Server) => {
